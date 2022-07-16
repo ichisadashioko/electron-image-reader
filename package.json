@@ -1,0 +1,11 @@
+{
+  "name": "image-reader",
+  "version": "0.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "19.0.8"
+  }
+}
