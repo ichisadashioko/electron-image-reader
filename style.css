@@ -5,3 +5,8 @@ body {
     color: white;
     background-color: #000000;
 }
+
+* {
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+}
