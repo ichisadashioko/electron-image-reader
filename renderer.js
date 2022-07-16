@@ -24,3 +24,18 @@ function get_saved_path_list() {
 
     return path_list;
 }
+
+let user_saved_path_list = get_saved_path_list();
+
+let user_saved_path_list_container = document.getElementById('pathlist');
+
+if (user_saved_path_list_container == null) {
+    console.log('user_saved_path_list_container is null');
+} else {
+    for (let i = 0; i < user_saved_path_list.length; i++) {
+        let path_str = user_saved_path_list[i];
+        let path_div = document.createElement('div');
+        path_div.innerHTML = path_str;
+        user_saved_path_list_container.appendChild(path_div);
+    }
+}
