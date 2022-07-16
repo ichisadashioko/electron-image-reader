@@ -10,3 +10,14 @@ body {
     color: white;
     font-family: 'Courier New', Courier, monospace;
 }
+
+.file-name-holder {
+    padding: 0;
+    margin: 0;
+    display: inline;
+    margin-left: 5px;
+}
+
+.children_container {
+    margin-left: 21px;
+}
