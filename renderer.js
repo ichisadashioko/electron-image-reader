@@ -4,6 +4,8 @@ const path = require('path');
 const userdata_dir = path.join(__dirname, 'userdata');
 const saved_path_list = path.join(userdata_dir, 'path_list.txt');
 
+var listing_lock = {};
+
 function get_saved_path_list() {
     if (!fs.existsSync(saved_path_list)) {
         return [];
@@ -23,6 +25,142 @@ function get_saved_path_list() {
     }
 
     return path_list;
+}
+
+function generate_child_file_entry_dom_node(
+    filepath,
+    file_name,
+    dirent_obj,
+) {
+    let container = document.createElement('div');
+    let file_type_icon = document.createElement('i');
+    file_type_icon.classList.add('bi');
+    file_type_icon.classList.add('file_type_icon');
+
+    if (dirent_obj.isDirectory()) {
+        file_type_icon.classList.add('bi-folder');
+    } else if (dirent_obj.isFile()) {
+        file_type_icon.classList.add('bi-file-earmark');
+    } else if (dirent_obj.isSymbolicLink()) {
+        file_type_icon.classList.add('bi-folder-symlink');
+    }
+    else {
+        file_type_icon.classList.add('bi-file-earmark-x');
+    }
+
+    let file_name_holder = document.createElement('p');
+    file_name_holder.classList.add('file-name-holder');
+    file_name_holder.textContent = file_name;
+    file_name_holder.addEventListener('click', function (evt) {
+        on_file_name_click(
+            evt,
+            container,
+            filepath,
+        );
+    });
+
+    container.appendChild(file_type_icon);
+    container.appendChild(file_name_holder);
+
+    return container;
+}
+
+function on_file_name_click(
+    evt,
+    container_dom_node,
+    filepath,
+) {
+    console.debug(evt);
+    if (container_dom_node.lock != null) {
+        console.log('on_file_name_click: container_dom_node.lock != null');
+        console.log(arguments);
+        console.log(container_dom_node);
+        // TODO log message
+        return;
+    }
+
+    container_dom_node.lock = true;
+    let is_lock_passed = false;
+
+    try {
+        let file_stat = fs.statSync(filepath);
+
+        if (file_stat.isDirectory()) {
+            if (listing_lock[filepath] != null) {
+                console.log(`${filepath} listing is locked`);
+            } else {
+                try {
+                    listing_lock[filepath] = true;
+                    is_lock_passed = true;
+
+                    fs.readdir(
+                        filepath,
+                        {
+                            withFileTypes: true,
+                            encoding: 'utf8',
+                        },
+                        function (err, dirent_array) {
+                            listing_lock[filepath] = null;
+
+                            if (err != null) {
+                                console.error(`fs.readdir ${filepath} error`);
+                                console.error(err);
+                                container_dom_node.lock = null;
+                                return;
+                            }
+
+                            // TODO customize sorting
+                            // TODO store selected sorting method for each directory
+
+                            let child_file_entry_dom_nodes = [];
+                            // TODO show empty directory indicator
+                            for (let i = 0; i < dirent_array.length; i++) {
+                                let dirent_obj = dirent_array[i];
+                                let child_filepath = path.join(filepath, dirent_obj.name);
+
+                                let child_file_entry_dom_node = generate_child_file_entry_dom_node(
+                                    child_filepath,
+                                    dirent_obj.name,
+                                    dirent_obj,
+                                );
+
+                                child_file_entry_dom_nodes.push(child_file_entry_dom_node);
+                            }
+
+                            let children_container = container_dom_node.getElementsByClassName('children_container')[0];
+                            if (children_container == null) {
+                                // console.log('children_container is null');
+                                children_container = document.createElement('div');
+                                children_container.className = 'children_container';
+
+                                container_dom_node.appendChild(children_container);
+                            }
+
+                            children_container.innerHTML = '';
+                            for (let i = 0; i < child_file_entry_dom_nodes.length; i++) {
+                                children_container.appendChild(child_file_entry_dom_nodes[i]);
+                            }
+
+                            container_dom_node.lock = null;
+                        }
+                    )
+                } catch (listing_error) {
+                    console.error(`${filepath} listing error`);
+                    console.error(listing_error);
+                }
+            }
+        } else if (file_stat.isFile()) {
+            // TODO
+        } else {
+            console.error(`unhandled file type: ${filepath}`);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    if (!is_lock_passed) {
+        container_dom_node.lock = null;
+    }
 }
 
 let user_saved_path_list = get_saved_path_list();
@@ -60,82 +198,12 @@ if (user_saved_path_list_container == null) {
         path_div.appendChild(icon_element);
         path_div.appendChild(file_name_holder);
         // path_div.innerHTML = path_str;
-        path_div.addEventListener('click', function () {
-            if (GLOBAL_USER_SAVED_PATH_DICT[path_str].listing) {
-                console.log(`${path_str} is listing`);
-            }
-            // TODO expand style tree
-            // TODO keep child tree expanded
-
-            GLOBAL_USER_SAVED_PATH_DICT[path_str].expanded = !GLOBAL_USER_SAVED_PATH_DICT[path_str].expanded;
-            if (GLOBAL_USER_SAVED_PATH_DICT[path_str].expanded) {
-                let children_container = path_div.getElementsByClassName('children_container')[0];
-                if (children_container == null) {
-                    console.log('children_container is null');
-                    children_container = document.createElement('div');
-                    children_container.className = 'children_container';
-
-                    path_div.appendChild(children_container);
-                }
-
-                GLOBAL_USER_SAVED_PATH_DICT[path_str].listing = true;
-
-                fs.readdir(
-                    path_str,
-                    {
-                        withFileTypes: true,
-                        encoding: 'utf8',
-                    },
-                    function (error, files) {
-                        GLOBAL_USER_SAVED_PATH_DICT[path_str].listing = false;
-                        if (error) {
-                            console.log(error);
-                            // TODO show error message / indicator
-                            return;
-                        }
-
-                        // TODO update/refresh children node
-                        // and keep expansion state
-
-                        children_container.innerHTML = '';
-                        GLOBAL_USER_SAVED_PATH_DICT[path_str].children = [];
-
-                        for (let i = 0; i < files.length; i++) {
-                            let file_info = files[i];
-                            let in_memory_file_info = {
-                                'fs.Dirent': file_info,
-                            }
-
-                            GLOBAL_USER_SAVED_PATH_DICT[path_str].children.push(in_memory_file_info);
-
-                            let child_div = document.createElement('div');
-                            let file_type_div = document.createElement('i');
-                            file_type_div.classList.add('file_type_icon')
-                            file_type_div.classList.add('bi')
-
-                            if (file_info.isDirectory()) {
-                                file_type_div.classList.add('bi-folder');
-                            } else if (file_info.isFile()) {
-                                file_type_div.classList.add('bi-file-earmark');
-                            } else if (file_info.isSymbolicLink()) {
-                                file_type_div.classList.add('bi-folder-symlink');
-                            }
-                            else {
-                                file_type_div.classList.add('bi-file-earmark-x');
-                            }
-
-                            let file_name_holder = document.createElement('p');
-                            file_name_holder.classList.add('file-name-holder');
-                            file_name_holder.textContent = file_info.name;
-
-                            child_div.appendChild(file_type_div);
-                            child_div.appendChild(file_name_holder);
-
-                            children_container.appendChild(child_div);
-                        }
-                    }
-                )
-            }
+        file_name_holder.addEventListener('click', function (evt) {
+            on_file_name_click(
+                evt,
+                path_div,
+                path_str,
+            );
         });
 
         user_saved_path_list_container.appendChild(path_div);

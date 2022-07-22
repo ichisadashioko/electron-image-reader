@@ -18,6 +18,12 @@ body {
     margin-left: 5px;
 }
 
+.file-name-holder:hover {
+    background-color: #222222;
+    color: #00ff00;
+    cursor: pointer;
+}
+
 .children_container {
     margin-left: 21px;
 }
