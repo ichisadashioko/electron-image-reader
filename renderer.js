@@ -196,6 +196,7 @@ function on_file_name_click(
                             image_panel.appendChild(image_dom_node);
 
                             setTimeout(function () {
+                                // TODO uri encode each file name in path
                                 image_dom_node.src = filepath;
                             }, 0);
 
@@ -265,3 +266,50 @@ if (user_saved_path_list_container == null) {
         user_saved_path_list_container.appendChild(path_div);
     }
 }
+
+var toggle_file_browsing_key_down = false;
+const TOGGLE_FILE_BROWSING_KEY_CODE = 'F1';
+
+document.addEventListener('keydown', function (evt) {
+    if (evt.defaultPrevented) {
+        console.debug(evt);
+        return;
+    }
+
+    console.debug(`keydown - code ${evt.code} - key ${evt.key}`);
+
+    if (evt.key === TOGGLE_FILE_BROWSING_KEY_CODE) {
+        evt.preventDefault();
+
+        if (toggle_file_browsing_key_down) {
+            console.debug(`${evt.key} is not released!`);
+            return;
+        }
+
+        toggle_file_browsing_key_down = true;
+        let file_browsing_panel = document.getElementById('pathlist');
+        if (file_browsing_panel == null) {
+            console.error('file_browsing_panel == null');
+        } else {
+            if (file_browsing_panel.style.display === 'none') {
+                file_browsing_panel.style.display = null;
+            } else {
+                file_browsing_panel.style.display = 'none';
+            }
+        }
+    }
+});
+
+document.addEventListener('keyup', function (evt) {
+    if (evt.defaultPrevented) {
+        console.debug(evt);
+        return;
+    }
+
+    console.debug(`keyup - code ${evt.code} - key ${evt.key}`);
+
+    if (evt.key === TOGGLE_FILE_BROWSING_KEY_CODE) {
+        evt.preventDefault();
+        toggle_file_browsing_key_down = false;
+    }
+});

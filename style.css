@@ -31,3 +31,20 @@ body {
 .children_container {
     margin-left: 21px;
 }
+
+#root_container {
+    display: grid;
+    grid-template-areas: "pathlist image_panel";
+}
+
+#pathlist {
+    height: 100vh;
+    overflow-y: scroll;
+    grid-area: pathlist;
+}
+
+#image_panel {
+    height: 100vh;
+    overflow-y: scroll;
+    grid-area: image_panel;
+}
