@@ -6,6 +6,19 @@ const saved_path_list = path.join(userdata_dir, 'path_list.txt');
 
 var listing_lock = {};
 
+const IMAGE_EXTENSION_LIST = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'bmp',
+    'webp',
+    'svg',
+    'tiff',
+    'tif',
+    'ico',
+];
+
 function get_saved_path_list() {
     if (!fs.existsSync(saved_path_list)) {
         return [];
@@ -33,19 +46,24 @@ function generate_child_file_entry_dom_node(
     dirent_obj,
 ) {
     let container = document.createElement('div');
+
     let file_type_icon = document.createElement('i');
     file_type_icon.classList.add('bi');
     file_type_icon.classList.add('file_type_icon');
 
     if (dirent_obj.isDirectory()) {
         file_type_icon.classList.add('bi-folder');
+        container.classList.add('filetype_directory');
     } else if (dirent_obj.isFile()) {
         file_type_icon.classList.add('bi-file-earmark');
+        container.classList.add('filetype_regular_file');
     } else if (dirent_obj.isSymbolicLink()) {
         file_type_icon.classList.add('bi-folder-symlink');
+        container.classList.add('filetype_symbolic_link');
     }
     else {
         file_type_icon.classList.add('bi-file-earmark-x');
+        container.classList.add('filetype_unknown');
     }
 
     let file_name_holder = document.createElement('p');
@@ -65,6 +83,11 @@ function generate_child_file_entry_dom_node(
     return container;
 }
 
+/**
+ * @param {MouseEvent} evt
+ * @param {HTMLElement} container_dom_node
+ * @param {string} filepath
+ */
 function on_file_name_click(
     evt,
     container_dom_node,
@@ -128,6 +151,7 @@ function on_file_name_click(
                             }
 
                             let children_container = container_dom_node.getElementsByClassName('children_container')[0];
+                            container_dom_node.children
                             if (children_container == null) {
                                 // console.log('children_container is null');
                                 children_container = document.createElement('div');
@@ -150,7 +174,39 @@ function on_file_name_click(
                 }
             }
         } else if (file_stat.isFile()) {
-            // TODO
+            let file_extension = path.extname(filepath);
+            if (file_extension.length < 1) {
+                console.log(`${filepath} does not have extension indicator in file name`);
+            } else {
+                file_extension = file_extension.substring(1).toLowerCase();
+                if (IMAGE_EXTENSION_LIST.indexOf(file_extension) < 0) {
+                    console.log(`${filepath} is not a supported image file type`);
+                } else {
+                    // TODO handle lazy loading in array of images
+                    let image_panel = document.getElementById('image_panel');
+                    if (image_panel == null) {
+                        console.error('image_panel is null');
+                    } else {
+                        if (image_panel.lock == null) {
+                            image_panel.lock = true;
+
+                            image_panel.replaceChildren();
+
+                            let image_dom_node = document.createElement('img');
+                            image_panel.appendChild(image_dom_node);
+
+                            setTimeout(function () {
+                                image_dom_node.src = filepath;
+                            }, 0);
+
+                            image_panel.lock = null;
+                        } else {
+                            console.log('image_panel.lock != null');
+                            console.log(image_panel);
+                        }
+                    }
+                }
+            }
         } else {
             console.error(`unhandled file type: ${filepath}`);
         }
