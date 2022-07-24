@@ -15,6 +15,21 @@
         <div id="pathlist"></div>
         <div id="image_panel"></div>
     </div>
+    <div id="image_rendering_configuration">
+        <fieldset>
+            <legend>image size</legend>
+            <div class="section">
+                <input type="radio" name="image_size" id="image_size_original">
+                <label for="image_size_original">original</label>
+                <input type="radio" name="image_size" id="image_size_fit_height">
+                <label for="image_size_fit_height">fit height</label>
+                <input type="radio" name="image_size" id="image_size_fit_width">
+                <label for="image_size_fit_width">fit width</label>
+                <input type="radio" name="image_size" id="image_size_auto_fit">
+                <label for="image_size_auto_fit">auto fit</label>
+            </div>
+        </fieldset>
+    </div>
     <script src="./renderer.js"></script>
 </body>
 

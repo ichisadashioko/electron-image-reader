@@ -267,8 +267,12 @@ if (user_saved_path_list_container == null) {
     }
 }
 
+/**********************************************************************/
 var toggle_file_browsing_key_down = false;
 const TOGGLE_FILE_BROWSING_KEY_CODE = 'F1';
+
+var toggle_image_rendering_configuration_panel_key_down = false;
+const TOGGLE_IMAGE_RENDERING_CONFIGURATION_PANEL_KEY_CODE = 'F3';
 
 document.addEventListener('keydown', function (evt) {
     if (evt.defaultPrevented) {
@@ -297,6 +301,25 @@ document.addEventListener('keydown', function (evt) {
                 file_browsing_panel.style.display = 'none';
             }
         }
+    } else if (evt.key === TOGGLE_IMAGE_RENDERING_CONFIGURATION_PANEL_KEY_CODE) {
+        evt.preventDefault();
+
+        if (toggle_image_rendering_configuration_panel_key_down) {
+            console.debug(`${evt.key} is not released!`);
+            return;
+        }
+
+        toggle_image_rendering_configuration_panel_key_down = true;
+        let image_rendering_configuration_panel = document.getElementById('image_rendering_configuration');
+        if (image_rendering_configuration_panel == null) {
+            console.error('image_rendering_configuration_panel == null');
+        } else {
+            if (image_rendering_configuration_panel.style.display === 'none') {
+                image_rendering_configuration_panel.style.display = null;
+            } else {
+                image_rendering_configuration_panel.style.display = 'none';
+            }
+        }
     }
 });
 
@@ -311,5 +334,86 @@ document.addEventListener('keyup', function (evt) {
     if (evt.key === TOGGLE_FILE_BROWSING_KEY_CODE) {
         evt.preventDefault();
         toggle_file_browsing_key_down = false;
+    } else if (evt.key === TOGGLE_IMAGE_RENDERING_CONFIGURATION_PANEL_KEY_CODE) {
+        evt.preventDefault();
+        toggle_image_rendering_configuration_panel_key_down = false;
     }
 });
+
+/**********************************************************************/
+var image_rendering_configuration_panel = document.getElementById('image_rendering_configuration');
+if (image_rendering_configuration_panel == null) {
+    console.error('image_rendering_configuration_panel == null');
+} else {
+
+    /**********************************************************************/
+    image_rendering_configuration_panel.addEventListener('mousedown', function (evt) {
+        if (evt.defaultPrevented) {
+            console.debug(evt);
+            return;
+        }
+
+        evt.preventDefault();
+        image_rendering_configuration_panel.grabbed = {
+            offsetx: image_rendering_configuration_panel.offsetLeft - evt.clientX,
+            offsety: image_rendering_configuration_panel.offsetTop - evt.clientY,
+        };
+    });
+
+    /**********************************************************************/
+    image_rendering_configuration_panel.addEventListener('mouseup', function (evt) {
+        image_rendering_configuration_panel.grabbed = null;
+    });
+
+    /**********************************************************************/
+    /*
+    image_rendering_configuration_panel.addEventListener('mousemove', function (evt) {
+        if (image_rendering_configuration_panel.grabbed == null) {
+            return;
+        }
+
+        // console.debug(`buttons ${evt.buttons} - clientX ${evt.clientX} - clientY ${evt.clientY}`);
+
+        let isLeftButtonStillDown = (evt.buttons & 1) === 1;
+
+        if (!isLeftButtonStillDown) {
+            image_rendering_configuration_panel.grabbed = null;
+            return;
+        }
+
+        evt.preventDefault();
+
+        let new_x = evt.clientX + image_rendering_configuration_panel.grabbed.offsetx;
+        let new_y = evt.clientY + image_rendering_configuration_panel.grabbed.offsety;
+        image_rendering_configuration_panel.style.top = `${new_y}px`;
+        image_rendering_configuration_panel.style.left = `${new_x}px`;
+    });
+    */
+
+    /**********************************************************************/
+    document.addEventListener('mousemove', function (evt) {
+        if (evt.defaultPrevented) {
+            return;
+        }
+
+        if (image_rendering_configuration_panel.grabbed == null) {
+            return;
+        }
+
+        // console.debug(`buttons ${evt.buttons} - clientX ${evt.clientX} - clientY ${evt.clientY}`);
+
+        let isLeftButtonStillDown = (evt.buttons & 1) === 1;
+
+        if (!isLeftButtonStillDown) {
+            image_rendering_configuration_panel.grabbed = null;
+            return;
+        }
+
+        evt.preventDefault();
+
+        let new_x = evt.clientX + image_rendering_configuration_panel.grabbed.offsetx;
+        let new_y = evt.clientY + image_rendering_configuration_panel.grabbed.offsety;
+        image_rendering_configuration_panel.style.top = `${new_y}px`;
+        image_rendering_configuration_panel.style.left = `${new_x}px`;
+    });
+}
