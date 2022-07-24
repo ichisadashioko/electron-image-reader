@@ -353,6 +353,12 @@ if (image_rendering_configuration_panel == null) {
             return;
         }
 
+        // check if the mouse down is on child element of the panel
+        console.debug(evt.target);
+        if (evt.target == null) { return; }
+        if (evt.target.classList == null) { return; }
+        if (!evt.target.classList.contains('grabbable')) { return; }
+
         evt.preventDefault();
         image_rendering_configuration_panel.grabbed = {
             offsetx: image_rendering_configuration_panel.offsetLeft - evt.clientX,
@@ -361,44 +367,10 @@ if (image_rendering_configuration_panel == null) {
     });
 
     /**********************************************************************/
-    image_rendering_configuration_panel.addEventListener('mouseup', function (evt) {
-        image_rendering_configuration_panel.grabbed = null;
-    });
-
-    /**********************************************************************/
-    /*
-    image_rendering_configuration_panel.addEventListener('mousemove', function (evt) {
-        if (image_rendering_configuration_panel.grabbed == null) {
-            return;
-        }
-
-        // console.debug(`buttons ${evt.buttons} - clientX ${evt.clientX} - clientY ${evt.clientY}`);
-
-        let isLeftButtonStillDown = (evt.buttons & 1) === 1;
-
-        if (!isLeftButtonStillDown) {
-            image_rendering_configuration_panel.grabbed = null;
-            return;
-        }
-
-        evt.preventDefault();
-
-        let new_x = evt.clientX + image_rendering_configuration_panel.grabbed.offsetx;
-        let new_y = evt.clientY + image_rendering_configuration_panel.grabbed.offsety;
-        image_rendering_configuration_panel.style.top = `${new_y}px`;
-        image_rendering_configuration_panel.style.left = `${new_x}px`;
-    });
-    */
-
-    /**********************************************************************/
     document.addEventListener('mousemove', function (evt) {
-        if (evt.defaultPrevented) {
-            return;
-        }
+        if (evt.defaultPrevented) { return; }
 
-        if (image_rendering_configuration_panel.grabbed == null) {
-            return;
-        }
+        if (image_rendering_configuration_panel.grabbed == null) { return; }
 
         // console.debug(`buttons ${evt.buttons} - clientX ${evt.clientX} - clientY ${evt.clientY}`);
 
