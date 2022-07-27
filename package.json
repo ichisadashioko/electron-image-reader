@@ -1,5 +1,5 @@
 {
-  "name": "image-reader",
+  "name": "electron-image-reader",
   "version": "0.0.0",
   "main": "main.js",
   "scripts": {
