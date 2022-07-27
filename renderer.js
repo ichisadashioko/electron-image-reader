@@ -389,3 +389,107 @@ if (image_rendering_configuration_panel == null) {
         image_rendering_configuration_panel.style.left = `${new_x}px`;
     });
 }
+
+const IMAGE_RENDERING_CONFIGURATION_ORIGINAL = 0;
+const IMAGE_RENDERING_CONFIGURATION_FIT_HEIGHT = 1;
+const IMAGE_RENDERING_CONFIGURATION_FIT_WIDTH = 2;
+const IMAGE_RENDERING_CONFIGURATION_AUTO_FIT = 3;
+
+var CURRENT_IMAGE_RENDERING_CONFIGURATION = IMAGE_RENDERING_CONFIGURATION_ORIGINAL;
+
+/**
+ * @param {number} image_rendering_configuration_style
+ * @param {HTMLImageElement} image_dom
+ * @param {HTMLElement} image_container_dom
+ */
+function change_image_rendering_style(
+    image_rendering_configuration_style,
+    image_dom,
+    image_container_dom,
+) {
+    if (image_rendering_configuration_style === IMAGE_RENDERING_CONFIGURATION_ORIGINAL) {
+        if (image_dom.style.width !== '') {
+            image_dom.style.width = '';
+        }
+
+        if (image_dom.style.height !== '') {
+            image_dom.style.height = '';
+        }
+    } else if (image_rendering_configuration_style === IMAGE_RENDERING_CONFIGURATION_FIT_HEIGHT) {
+        if (image_dom.style.width !== '') {
+            image_dom.style.width = '';
+        }
+
+        if (image_dom.style.height !== '100%') {
+            image_dom.style.height = '100%';
+        }
+
+        // TODO hide the scrollbar if the current image width is smaller than the image container width
+    } else if (image_rendering_configuration_style === IMAGE_RENDERING_CONFIGURATION_FIT_WIDTH) {
+        if (image_dom.style.width !== '100%') {
+            image_dom.style.width = '100%';
+        }
+
+        if (image_dom.style.height !== '') {
+            image_dom.style.height = '';
+        }
+    } else {
+        console.error(`unsupported image_rendering_configuration_style - ${image_rendering_configuration_style}`);
+    }
+}
+
+function on_image_rendering_configuration_change() {
+    // single image
+    let image_panel = document.getElementById('image_panel');
+    if (image_panel == null) {
+        console.error('image_panel == null');
+    } else {
+        let image_dom_array = image_panel.getElementsByTagName('img');
+        // TODO handle multiple images
+        if (image_dom_array.length > 0) {
+            change_image_rendering_style(
+                CURRENT_IMAGE_RENDERING_CONFIGURATION,
+                image_dom_array[0],
+                image_panel,
+            );
+        } else {
+            console.error('image_dom_array.length == 0');
+        }
+    }
+}
+
+var image_rendering_configuration_original_size_radio_button = document.getElementById('image_size_original');
+if (image_rendering_configuration_original_size_radio_button == null) {
+    console.error('image_rendering_configuration_original_size_radio_button == null');
+} else {
+    image_rendering_configuration_original_size_radio_button.addEventListener('click', function (evt) {
+        if (evt.defaultPrevented) { return; }
+
+        CURRENT_IMAGE_RENDERING_CONFIGURATION = IMAGE_RENDERING_CONFIGURATION_ORIGINAL;
+        on_image_rendering_configuration_change();
+    });
+}
+
+var image_rendering_configuration_fit_height_radio_button = document.getElementById('image_size_fit_height');
+if (image_rendering_configuration_fit_height_radio_button == null) {
+    console.error('image_rendering_configuration_fit_height_radio_button == null');
+} else {
+    image_rendering_configuration_fit_height_radio_button.addEventListener('click', function (evt) {
+        if (evt.defaultPrevented) { return; }
+
+        CURRENT_IMAGE_RENDERING_CONFIGURATION = IMAGE_RENDERING_CONFIGURATION_FIT_HEIGHT;
+        on_image_rendering_configuration_change();
+    });
+}
+
+var image_rendering_configuration_fit_width_radio_button = document.getElementById('image_size_fit_width');
+if (image_rendering_configuration_fit_width_radio_button == null) {
+    console.error('image_rendering_configuration_fit_width_radio_button == null');
+} else {
+    image_rendering_configuration_fit_width_radio_button.addEventListener('click', function (evt) {
+        if (evt.defaultPrevented) { return; }
+
+        CURRENT_IMAGE_RENDERING_CONFIGURATION = IMAGE_RENDERING_CONFIGURATION_FIT_WIDTH;
+        on_image_rendering_configuration_change();
+    });
+}
